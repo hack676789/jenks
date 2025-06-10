@@ -27,7 +27,7 @@ public class PersonServiceTests {
         MockitoAnnotations.openMocks(this);
         person = new PersonEntiy();
         person.setId(1L);
-        person.setName("John");
+        person.setName("Jack");
         person.setCity("Dakar");
         person.setPhoneNumber("123456789");
     }
