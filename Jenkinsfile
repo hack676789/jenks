@@ -1,72 +1,51 @@
 pipeline {
     agent any  
 
-
     stages {
-        // Étape 1: Récupération du code source
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/hack676789/jenks.git', branch: 'main'
             }
         }
 
-        // Étape 2: Build et exécution des tests
         stage('Build & Test') {
             steps {
-                sh 'mvn clean test' 
-                // OU pour Gradle: sh './gradlew clean test'
+                bat 'mvn clean test' 
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'  // Publie les rapports JUnit
-                    // Pour Gradle: junit '**/build/test-results/test/*.xml'
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
                 }
                 failure {
-                    emailext body: 'Les tests ont échoué dans le build ${BUILD_NUMBER}. Consultez: ${BUILD_URL}',
-                            subject: 'ÉCHEC des tests Jenkins - ${JOB_NAME}',
-                            to: 'votre-email@example.com'
+                    echo 'Les tests ont échoué'
+                    // Commentez l'email temporairement
+                    // emailext body: 'Les tests ont échoué dans le build ${BUILD_NUMBER}. Consultez: ${BUILD_URL}',
+                    //         subject: 'ÉCHEC des tests Jenkins - ${JOB_NAME}',
+                    //         to: 'votre-email@example.com'
                 }
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package -DskipTests' 
-                // Pour Gradle: sh './gradlew build -x test'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true  // Archive le JAR généré
+                bat 'mvn package -DskipTests'  
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
             }
         }
 
-        // Déploiement 
         stage('Deploy') {
             when {
                 expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
             }
             steps {
                 echo 'Déploiement en cours...'
-                // Exemple: Copie vers un serveur avec SSH
-                // sshPublisher(
-                //     publishers: [
-                //         sshPublisherDesc(
-                //             configName: 'mon-serveur',
-                //             transfers: [
-                //                 sshTransfer(
-                //                     sourceFiles: 'target/*.jar',
-                //                     remoteDirectory: '/opt/app'
-                //                 )
-                //             ]
-                //         )
-                //     ]
-                // )
             }
         }
     }
 
-    // Actions post-build
     post {
         success {
             echo 'Build et tests réussis!'
-            // Optionnel: Notification Slack/Email
         }
         failure {
             echo 'Échec du build ou des tests.'
