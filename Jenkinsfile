@@ -1,9 +1,6 @@
 pipeline {
     agent any  
 
-    tools {
-      
-    }
 
     stages {
         // Étape 1: Récupération du code source
