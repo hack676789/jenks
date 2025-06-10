@@ -6,7 +6,7 @@ pipeline {
         // Étape 1: Récupération du code source
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/votre-utilisateur/votre-repo.git', branch: 'main'
+                git url: 'https://github.com/hack676789/jenks.git', branch: 'main'
             }
         }
 
